@@ -13,33 +13,28 @@ La entrega consiste en un programa escrito en Python que permite realizar un an√
 
 - [Python 3.11](https://www.python.org/downloads/release/python-3110/)
 
-## Entorno virtual (Opcional)
-
-Se recomienda utilizar un entorno virtual para instalar las dependencias del proyecto.
-
-1. Crear un entorno virtual
-```bash
-python -m venv .venv
-```
-2. Activar el entorno virtual
-```bash
-.venv\Scripts\activate
-```
-
-Para desactivar el entorno virtual, ejecutar el siguiente comando:
-```bash
-deactivate
-```
-
 ## Instalaci√≥n
 
 1. Clonar el repositorio
 ```bash
 git clone https://github.com/discombobulatingtheworld/algebra-trabajo1.git
 ```
-2. Instalar las dependencias
+2. Crear un entorno virtual (Opcional)
+```bash
+python -m venv .venv
+```
+3. Activar el entorno virtual (Si se creo en el paso anterior)
+```bash
+.venv\Scripts\activate
+```
+4. Instalar las dependencias
 ```bash
 pip install -r requirements.txt
+```
+
+Para desactivar el entorno virtual, ejecutar el siguiente comando:
+```bash
+deactivate
 ```
 
 ## Uso
