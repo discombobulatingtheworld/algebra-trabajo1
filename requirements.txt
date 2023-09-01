@@ -1,0 +1,4 @@
+jsonschema==4.19.0
+numpy==1.25.2
+pandas==2.1.0
+python-slugify==8.0.1
