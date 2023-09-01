@@ -17,6 +17,7 @@ import sys
 import os
 import json
 import argparse
+from typing import Tuple
 import unicodedata
 import numpy as np
 import slugify as slg
@@ -78,7 +79,7 @@ def load_tweets(path: str) -> list[str]:
         path (str): Ruta al archivo de texto con los tweets.
 
     Returns:
-        list: Lista de tweets.
+        list[str]: Lista con los tweets.
     """
 
     # Validaciones de parametros
@@ -104,10 +105,7 @@ def load_words(path: str) -> dict[str, list[str]]:
         path (str): Ruta al archivo JSON con las palabras.
 
     Returns:
-        list: Lista de palabras positivas.
-        list: Lista de palabras negativas.
-        list: Lista de palabras neutrales.
-        list: Lista de todas las palabras.
+        dict[str, list[str]]: Diccionario con las palabras clasificadas.
     """
 
     # Validaciones de parametros
@@ -156,7 +154,7 @@ def load_words(path: str) -> dict[str, list[str]]:
     
     return positive, negative, neutral, all_words
 
-def get_count_vector(text: str, words: list) -> np.ndarray[int]:
+def get_count_vector(text: str, words: list[str]) -> np.ndarray[int]:
     """Crea un vector para un texto dado un conjunto de palabras, indicando
     cuantas veces aparece cada palabra en el texto. El orden de las palabras
     en el vector es el mismo que el orden en el que aparecen en el conjunto
@@ -164,7 +162,7 @@ def get_count_vector(text: str, words: list) -> np.ndarray[int]:
 
     Args:
         text (str): Texto a vectorizar.
-        words (list): Conjunto de palabras.
+        words (list[str]): Conjunto de palabras.
 
     Returns:
         np.ndarray[int]: Vector de conteo.
@@ -193,15 +191,15 @@ def get_count_vector(text: str, words: list) -> np.ndarray[int]:
     
     return count_vector
 
-def get_classification_vector(positive_words: list, neutral_words: list, negative_words: list, text: str) -> np.ndarray[int]:
+def get_classification_vector(positive_words: list[str], neutral_words: list[str], negative_words: list[str], text: str) -> np.ndarray[int]:
     """Crea un vector de clasificación para un texto dado un conjunto de palabras
     positivas, negativas y neutrales. El vector de clasificación indica cuantas
     palabras positivas, negativas y neutrales hay en el texto.
 
     Args:
-        positive_words (list): Conjunto de palabras positivas.
-        negative_words (list): Conjunto de palabras negativas.
-        neutral_words (list): Conjunto de palabras neutrales.
+        positive_words (list[str]): Conjunto de palabras positivas.
+        negative_words (list[str]): Conjunto de palabras negativas.
+        neutral_words (list[str]): Conjunto de palabras neutrales.
         text (str): Texto a clasificar.
 
     Returns:
@@ -253,21 +251,47 @@ def get_classification_vector(positive_words: list, neutral_words: list, negativ
 
     return classification_vector
 
-def process_tweet(tweet: str, positive_words: list[str], negative_words: list[str], neutral_words: list[str], all_words: list[str]) -> (int, float):
+def get_average_vector(vector: np.ndarray[int]) -> np.ndarray[float]:
+    """Crea un vector promedio a partir de un vector de conteo.
+
+    Args:
+        vector (np.ndarray[int]): Vector de conteo.
+
+    Returns:
+        np.ndarray[float]: Vector promedio.
+    """
+
+    # Validaciones de parametros
+    if not isinstance(vector, np.ndarray):
+        raise TypeError('El vector debe ser un np.ndarray.')
+    if not vector.any():
+        raise ValueError('El vector no puede estar vacío.')
+    if not all(isinstance(value, int) for value in vector.tolist()):
+        raise TypeError('El vector debe contener enteros.')
+
+    # Crea el vector promedio
+    average_vector = np.zeros((len(vector),), dtype=float)
+
+    # Calcula el vector promedio
+    for i, value in enumerate(vector):
+        average_vector[i] = value / len(vector)
+    
+    return average_vector
+
+def process_tweet(tweet: str, positive_words: list[str], negative_words: list[str], neutral_words: list[str], all_words: list[str]) -> Tuple[int, float]:
     """Procesa un tweet y realiza un análisis de sentimientos. El análisis de
     sentimientos se realiza a partir de un conjunto de palabras positivas,
     negativas y neutrales.
 
     Args:
         tweet (str): Tweet a analizar.
-        positive_words (list): Conjunto de palabras positivas.
-        negative_words (list): Conjunto de palabras negativas.
-        neutral_words (list): Conjunto de palabras neutrales.
-        all_words (list): Conjunto de todas las palabras.
+        positive_words (list[str]): Conjunto de palabras positivas.
+        negative_words (list[str]): Conjunto de palabras negativas.
+        neutral_words (list[str]): Conjunto de palabras neutrales.
+        all_words (list[str]): Conjunto de todas las palabras.
 
     Returns:
-        int: Puntuación del tweet.
-        float: Indice de calidad del resultado.
+        Tuple[int, float]: Tupla con la puntuación y el índice de calidad.
     """
 
     # Validaciones de parametros
@@ -320,8 +344,11 @@ def process_tweet(tweet: str, positive_words: list[str], negative_words: list[st
     # Calcula el valor del tweet
     score = classification_vector.T @ weight_vector
 
+    # Construye el vector promedio
+    average_vector = get_average_vector(count_vector)
+
     # Calcula el indice de calidad
-    quality_index = sum(np.dot((1/len(all_words)), count_vector))
+    quality_index = average_vector.T @ count_vector
 
     return score, quality_index
 
