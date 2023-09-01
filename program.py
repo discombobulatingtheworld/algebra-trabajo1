@@ -421,6 +421,7 @@ def main():
     # Si verboso, muestra la ruta del archivo de salida
     if args.verbose:
         print('Archivo de salida:', os.path.abspath(os.path.join(args.output, OUTPUT_FILE_NAME)))
+        print() 
 
 
 if __name__ == '__main__':
