@@ -23,7 +23,7 @@ python -m venv .venv
 ```
 2. Activar el entorno virtual
 ```bash
-source .venv\Scripts\activate
+.venv\Scripts\activate
 ```
 
 Para desactivar el entorno virtual, ejecutar el siguiente comando:
